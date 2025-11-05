@@ -1,0 +1,41 @@
+# Node modules (explicit for client/server)
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build outputs
+dist/
+build/
+client/build/
+server/build/
+coverage/
+.nyc_output/
+.cache/
+.parcel-cache/
+.vite/
+
+# Environment files (do NOT commit secrets)
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors/IDEs
+.vscode/
+.idea/
+
+# Misc
+*.tgz
+.cache-loader/
+
+# Keep lockfiles tracked (do NOT ignore package-lock.json / yarn.lock / pnpm-lock.yaml)
