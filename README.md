@@ -16,14 +16,6 @@ Because the frontend and backend are separate, you must install dependencies for
 
 ### Step 1: Install Dependencies
 Open your terminal in the project root and run:
-
-### Terminal 1(Backend): Make sure you are in root folder
-node index.js
-
-### Terminal 2(Frontend): Navigate to react-app
-cd react-app
-npm run dev
-
 ```bash
 # 1. Install Backend libraries (Express, Mongoose, CORS)
 npm install
@@ -31,3 +23,14 @@ npm install
 # 2. Install Frontend libraries (React, Axios, TypeScript)
 cd react-app
 npm install
+```
+
+### Terminal 1(Backend): Make sure you are in root folder
+```bash
+node index.js
+```
+### Terminal 2(Frontend): Navigate to react-app
+```bash
+cd react-app
+npm run dev
+```
