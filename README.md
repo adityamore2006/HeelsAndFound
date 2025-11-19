@@ -25,11 +25,12 @@ cd react-app
 npm install
 ```
 
-### Terminal 1(Backend): Make sure you are in root folder
+### Step 2: Running it
+#### Terminal 1(Backend): Make sure you are in root folder
 ```bash
 node index.js
 ```
-### Terminal 2(Frontend): Navigate to react-app
+#### Terminal 2(Frontend): Navigate to react-app
 ```bash
 cd react-app
 npm run dev
