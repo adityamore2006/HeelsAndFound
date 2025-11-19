@@ -1,9 +1,12 @@
+require('dotenv').config();
+const cors = require('cors');
 const express = require("express")
 const mongoose = require('mongoose');
 const Product = require("./models/product.model.js");
 const app = express()
 
 //middleware
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({extended:false}))
 
@@ -81,7 +84,7 @@ app.delete('/api/products/:id', async(req,res) => {
 })
 
 
-mongoose.connect('mongodb+srv://monerdo:Aditya1582$@backendheelsandfind.cc5fpxk.mongodb.net/?appName=BackendHeelsAndFind')
+mongoose.connect(process.env.MONGO_URI)
   .then(() => {
     console.log("Connected to database!");
     app.listen(3000, () => {
