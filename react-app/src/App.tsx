@@ -2,135 +2,295 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
 
-// 1. Define the Shape of your Data
-interface Product {
-  _id: string; // MongoDB generates this automatically
+interface Item {
+  _id: string;
   name: string;
-  location: string;
-  image?: string; // Optional
+  description: string;
+  type: 'found' | 'lost';
+  category: string;
+  status: 'active' | 'recovered';
+  locationFound: string;
+  locationDroppedOff: string;
+  lastSeenLocation: string;
+  image: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
-// Type for the form data (doesn't need _id yet)
-type ProductForm = Omit<Product, '_id'>;
+type ItemForm = {
+  name: string;
+  description: string;
+  type: 'found' | 'lost';
+  category: string;
+  locationFound: string;
+  locationDroppedOff: string;
+  lastSeenLocation: string;
+  image: string;
+};
+
+const CATEGORIES = ['Keys', 'ID / Cards', 'Electronics', 'Clothing', 'Bags', 'Other'];
+
+const emptyForm = (type: 'found' | 'lost'): ItemForm => ({
+  name: '',
+  description: '',
+  type,
+  category: '',
+  locationFound: '',
+  locationDroppedOff: '',
+  lastSeenLocation: '',
+  image: '',
+});
 
 function App() {
-  const API_URL = "http://localhost:3000/api/products";
+  const API_URL = 'http://localhost:3000/api/items';
 
-  // 2. Strictly Typed State
-  const [products, setProducts] = useState<Product[]>([]);
-  const [formData, setFormData] = useState<ProductForm>({ 
-    name: '', 
-    location: '',  
-    image: '' 
-  });
+  const [items, setItems] = useState<Item[]>([]);
+  const [activeTab, setActiveTab] = useState<'found' | 'lost'>('found');
+  const [formData, setFormData] = useState<ItemForm>(emptyForm('found'));
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [editId, setEditId] = useState<string | null>(null);
 
-  // READ
-  const fetchProducts = async () => {
+  const fetchItems = async (type: 'found' | 'lost') => {
     try {
-      const response = await axios.get<Product[]>(API_URL);
-      setProducts(response.data);
+      const response = await axios.get<Item[]>(`${API_URL}?type=${type}`);
+      setItems(response.data);
     } catch (error) {
-      console.error("Error fetching products:", error);
+      console.error('Error fetching items:', error);
     }
   };
 
   useEffect(() => {
-    fetchProducts();
-  }, []);
+    fetchItems(activeTab);
+  }, [activeTab]);
 
-  // Handle Input Changes
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+  const switchTab = (tab: 'found' | 'lost') => {
+    setActiveTab(tab);
+    setFormData(emptyForm(tab));
+    setIsEditing(false);
+    setEditId(null);
   };
 
-  // CREATE & UPDATE
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       if (isEditing && editId) {
-        await axios.put<Product>(`${API_URL}/${editId}`, formData);
+        await axios.put<Item>(`${API_URL}/${editId}`, formData);
         setIsEditing(false);
         setEditId(null);
       } else {
-        await axios.post<Product>(API_URL, formData);
+        await axios.post<Item>(API_URL, formData);
       }
-      setFormData({ name: '', location: '', image: '' });
-      fetchProducts();
+      setFormData(emptyForm(activeTab));
+      fetchItems(activeTab);
     } catch (error) {
-      console.error("Error saving product:", error);
+      console.error('Error saving item:', error);
     }
   };
 
-  // DELETE
+  const handleEdit = (item: Item) => {
+    setFormData({
+      name: item.name,
+      description: item.description || '',
+      type: item.type,
+      category: item.category || '',
+      locationFound: item.locationFound || '',
+      locationDroppedOff: item.locationDroppedOff || '',
+      lastSeenLocation: item.lastSeenLocation || '',
+      image: item.image || '',
+    });
+    setIsEditing(true);
+    setEditId(item._id);
+  };
+
   const handleDelete = async (id: string) => {
     try {
       await axios.delete(`${API_URL}/${id}`);
-      fetchProducts();
+      fetchItems(activeTab);
     } catch (error) {
-      console.error("Error deleting product:", error);
+      console.error('Error deleting item:', error);
     }
   };
 
-  // LOAD EDIT FORM
-  const handleEdit = (product: Product) => {
-    setFormData({
-      name: product.name,
-      location: product.location,
-      image: product.image || ''
-    });
-    setIsEditing(true);
-    setEditId(product._id);
+  const cancelEdit = () => {
+    setIsEditing(false);
+    setEditId(null);
+    setFormData(emptyForm(activeTab));
   };
 
+  const formTitle = isEditing
+    ? 'Edit Item'
+    : activeTab === 'found'
+    ? 'Post a Found Item'
+    : 'Report a Lost Item';
+
+  const submitLabel = isEditing
+    ? 'Update Item'
+    : activeTab === 'found'
+    ? 'Post Found Item'
+    : 'Report Lost Item';
+
   return (
-    <div style={{ padding: '20px' }}>
-      <h1>Heels & Found</h1>
+    <div className="app-container">
+      <header className="app-header">
+        <h1>Heels &amp; Found</h1>
+        <p className="app-subtitle">UNC Chapel Hill Lost &amp; Found</p>
+      </header>
 
-      <form onSubmit={handleSubmit} style={{ marginBottom: '20px', display: 'flex', gap: '10px' }}>
-        <input 
-          name="name" 
-          placeholder="Name" 
-          value={formData.name} 
-          onChange={handleChange} 
-          required 
-        />
-        <input 
-          name="location" 
-          type="string" 
-          placeholder="Location Found" 
-          value={formData.location} 
-          onChange={handleChange} 
-        />
-        <input 
-          name="image" 
-          placeholder="Image URL" 
-          value={formData.image} 
-          onChange={handleChange} 
-        />
-        <button type="submit">{isEditing ? "Update" : "Add"}</button>
-      </form>
+      <nav className="tab-nav">
+        <button
+          className={`tab-btn ${activeTab === 'found' ? 'tab-btn--active' : ''}`}
+          onClick={() => switchTab('found')}
+        >
+          Found Items
+        </button>
+        <button
+          className={`tab-btn ${activeTab === 'lost' ? 'tab-btn--active' : ''}`}
+          onClick={() => switchTab('lost')}
+        >
+          Lost Items
+        </button>
+      </nav>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '20px' }}>
-        {products.map((product) => (
-          <div key={product._id} style={{ border: '3px solid #ccc', padding: '10px', borderRadius: '10px', overflow: 'hidden'}}>
-            {product.image && <img src={product.image} alt={product.name} style={{ width: '100px' }} />}
-            <h3>{product.name}</h3>
-            <p>Location: {product.location}</p>
-            
-            
-            <div style={{ display: 'flex', gap: '5px' }}>
-              <button onClick={() => handleEdit(product)}>Edit</button>
-              <button onClick={() => handleDelete(product._id)} style={{ backgroundColor: '#ff4444', color: 'white' }}>Delete</button>
+      <main className="main-content">
+        <section className="form-section">
+          <h2>{formTitle}</h2>
+          <form onSubmit={handleSubmit} className="item-form">
+            <input
+              name="name"
+              placeholder="Item name *"
+              value={formData.name}
+              onChange={handleChange}
+              required
+            />
+            <textarea
+              name="description"
+              placeholder="Description (color, brand, distinguishing features…)"
+              value={formData.description}
+              onChange={handleChange}
+            />
+            <select name="category" value={formData.category} onChange={handleChange}>
+              <option value="">Select category (optional)</option>
+              {CATEGORIES.map((cat) => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
+
+            {activeTab === 'found' ? (
+              <>
+                <input
+                  name="locationFound"
+                  placeholder="Where did you find it? *"
+                  value={formData.locationFound}
+                  onChange={handleChange}
+                  required
+                />
+                <input
+                  name="locationDroppedOff"
+                  placeholder="Where did you drop it off? *"
+                  value={formData.locationDroppedOff}
+                  onChange={handleChange}
+                  required
+                />
+              </>
+            ) : (
+              <input
+                name="lastSeenLocation"
+                placeholder="Where did you last see it? *"
+                value={formData.lastSeenLocation}
+                onChange={handleChange}
+                required
+              />
+            )}
+
+            <input
+              name="image"
+              placeholder="Image URL (optional)"
+              value={formData.image}
+              onChange={handleChange}
+            />
+
+            <div className="form-actions">
+              <button type="submit" className="btn btn--primary">
+                {submitLabel}
+              </button>
+              {isEditing && (
+                <button type="button" className="btn btn--secondary" onClick={cancelEdit}>
+                  Cancel
+                </button>
+              )}
             </div>
+          </form>
+        </section>
+
+        <section className="items-grid-section">
+          <h2>
+            {activeTab === 'found' ? 'Found Items' : 'Lost Items'} ({items.length})
+          </h2>
+          <div className="items-grid">
+            {items.map((item) => (
+              <div key={item._id} className="item-card">
+                {item.image && (
+                  <img src={item.image} alt={item.name} className="item-card__image" />
+                )}
+                <div className="item-card__body">
+                  <h3 className="item-card__title">{item.name}</h3>
+                  {item.description && (
+                    <p className="item-card__description">{item.description}</p>
+                  )}
+                  {item.category && (
+                    <span className="item-card__category">{item.category}</span>
+                  )}
+
+                  {item.type === 'found' ? (
+                    <>
+                      {item.locationFound && (
+                        <p><strong>Found at:</strong> {item.locationFound}</p>
+                      )}
+                      {item.locationDroppedOff && (
+                        <p><strong>Dropped off at:</strong> {item.locationDroppedOff}</p>
+                      )}
+                    </>
+                  ) : (
+                    item.lastSeenLocation && (
+                      <p><strong>Last seen:</strong> {item.lastSeenLocation}</p>
+                    )
+                  )}
+
+                  <p className="item-card__date">
+                    Posted {new Date(item.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+                <div className="item-card__actions">
+                  <button
+                    className="btn btn--secondary btn--sm"
+                    onClick={() => handleEdit(item)}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    className="btn btn--danger btn--sm"
+                    onClick={() => handleDelete(item._id)}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+            {items.length === 0 && (
+              <p className="empty-state">
+                No {activeTab} items posted yet. Be the first!
+              </p>
+            )}
           </div>
-        ))}
-      </div>
+        </section>
+      </main>
     </div>
   );
 }

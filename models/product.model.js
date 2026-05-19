@@ -1,23 +1,41 @@
 const mongoose = require("mongoose");
 
-const ProductSchema = mongoose.Schema(
+const ItemSchema = mongoose.Schema(
     {
-        name:{
+        name: {
             type: String,
-            required: [true, "Please enter product name"]
+            required: [true, "Please enter item name"]
         },
-
-        location:{
+        description: {
             type: String,
-            required: true
+            default: ''
         },
-
-        // price:{
-        //     type: Number,
-        //     required: true,
-        //     default: 0
-        // },
-
+        type: {
+            type: String,
+            enum: ['found', 'lost'],
+            required: [true, "Please specify if item is lost or found"]
+        },
+        category: {
+            type: String,
+            default: ''
+        },
+        status: {
+            type: String,
+            enum: ['active', 'recovered'],
+            default: 'active'
+        },
+        locationFound: {
+            type: String,
+            default: ''
+        },
+        locationDroppedOff: {
+            type: String,
+            default: ''
+        },
+        lastSeenLocation: {
+            type: String,
+            default: ''
+        },
         image: {
             type: String,
             required: false,
@@ -25,9 +43,9 @@ const ProductSchema = mongoose.Schema(
     },
     {
         timestamps: true
-    } 
+    }
 )
 
-const Product = mongoose.model("Product", ProductSchema);
+const Item = mongoose.model("Item", ItemSchema);
 
-module.exports = Product;
+module.exports = Item;
