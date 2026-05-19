@@ -164,16 +164,6 @@ function App() {
         </button>
       </nav>
 
-      <div className="search-bar">
-        <input
-          type="text"
-          className="search-input"
-          placeholder={`Search ${activeTab} items…`}
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-      </div>
-
       <main className="main-content">
         <section className="form-section">
           <h2>{formTitle}</h2>
@@ -249,6 +239,15 @@ function App() {
           <h2>
             {activeTab === 'found' ? 'Found Items' : 'Lost Items'} ({filteredItems.length})
           </h2>
+          <div className="search-bar">
+            <input
+              type="text"
+              className="search-input"
+              placeholder={`Search ${activeTab} items…`}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
           <div className="items-grid">
             {filteredItems.map((item) => (
               <div key={item._id} className="item-card">

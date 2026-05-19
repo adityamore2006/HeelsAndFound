@@ -88,14 +88,11 @@
 
 /* Search Bar */
 .search-bar {
-  background-color: var(--color-white);
-  border-bottom: 1px solid var(--color-border);
-  padding: 12px 32px;
+  margin-bottom: 16px;
 }
 
 .search-input {
   width: 100%;
-  max-width: 480px;
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-btn);
   padding: 9px 14px;
