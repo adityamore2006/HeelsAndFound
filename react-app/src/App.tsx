@@ -46,6 +46,7 @@ function App() {
 
   const [items, setItems] = useState<Item[]>([]);
   const [activeTab, setActiveTab] = useState<'found' | 'lost'>('found');
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [formData, setFormData] = useState<ItemForm>(emptyForm('found'));
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [editId, setEditId] = useState<string | null>(null);
@@ -68,6 +69,7 @@ function App() {
     setFormData(emptyForm(tab));
     setIsEditing(false);
     setEditId(null);
+    setSearchQuery('');
   };
 
   const handleChange = (
@@ -124,6 +126,10 @@ function App() {
     setFormData(emptyForm(activeTab));
   };
 
+  const filteredItems = items.filter(item =>
+    item.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   const formTitle = isEditing
     ? 'Edit Item'
     : activeTab === 'found'
@@ -157,6 +163,16 @@ function App() {
           Lost Items
         </button>
       </nav>
+
+      <div className="search-bar">
+        <input
+          type="text"
+          className="search-input"
+          placeholder={`Search ${activeTab} items…`}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+      </div>
 
       <main className="main-content">
         <section className="form-section">
@@ -231,10 +247,10 @@ function App() {
 
         <section className="items-grid-section">
           <h2>
-            {activeTab === 'found' ? 'Found Items' : 'Lost Items'} ({items.length})
+            {activeTab === 'found' ? 'Found Items' : 'Lost Items'} ({filteredItems.length})
           </h2>
           <div className="items-grid">
-            {items.map((item) => (
+            {filteredItems.map((item) => (
               <div key={item._id} className="item-card">
                 {item.image && (
                   <img src={item.image} alt={item.name} className="item-card__image" />
@@ -283,9 +299,11 @@ function App() {
                 </div>
               </div>
             ))}
-            {items.length === 0 && (
+            {filteredItems.length === 0 && (
               <p className="empty-state">
-                No {activeTab} items posted yet. Be the first!
+                {searchQuery
+                  ? `No ${activeTab} items match "${searchQuery}".`
+                  : `No ${activeTab} items posted yet. Be the first!`}
               </p>
             )}
           </div>

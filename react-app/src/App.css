@@ -86,6 +86,32 @@
   border-bottom-color: var(--color-carolina-blue);
 }
 
+/* Search Bar */
+.search-bar {
+  background-color: var(--color-white);
+  border-bottom: 1px solid var(--color-border);
+  padding: 12px 32px;
+}
+
+.search-input {
+  width: 100%;
+  max-width: 480px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-btn);
+  padding: 9px 14px;
+  font-size: 0.95rem;
+  color: var(--color-text-primary);
+  font-family: inherit;
+  background-color: var(--color-white);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--color-carolina-blue);
+  box-shadow: 0 0 0 3px rgba(75, 156, 211, 0.18);
+}
+
 /* Main two-column layout */
 .main-content {
   display: grid;
